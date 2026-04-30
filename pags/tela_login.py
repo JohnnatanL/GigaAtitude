@@ -6,7 +6,7 @@ from time import sleep
 from stylo.css import aplicar_css_global    
 
 def tela_login():
-    st.set_page_config(layout="wide")
+    st.set_page_config(layout="wide", initial_sidebar_state="expanded")
     hidden()
     #aplicar_css_global()
     st.title("Login")

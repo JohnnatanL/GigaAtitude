@@ -2,7 +2,7 @@ import streamlit as st
 from controller.hidden import hidden
 from stylo.css import aplicar_css_global
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="expanded"))
 hidden()
 #aplicar_css_global()
 

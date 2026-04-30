@@ -1,5 +1,6 @@
 ﻿import pymysql
 import psycopg2
+from databricks import sql as dbsql
 from dotenv import load_dotenv
 import os
 
@@ -26,3 +27,20 @@ def conecta_supabase():
         }
     conn = psycopg2.connect(**conn_info)
     return conn
+
+def conecta_databricks():
+    load_dotenv()
+    
+    try:
+        # Estabelecer a conexão ODBC com Databricks
+        conexao = dbsql.connect(
+        server_hostname=os.getenv('HOST_DBRICKS'),
+        http_path=os.getenv('HTTP_DBRICKS'),
+        access_token=os.getenv('TOKEN_DBRICKS')
+        )
+        print('Conexão bem-sucedida')
+
+    except dbsql.Error as e:
+        print(f"Erro ao conectar:")
+
+    return conexao

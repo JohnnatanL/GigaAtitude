@@ -12,7 +12,7 @@ from controller.user_control import (
     get_perfil
 )
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 hidden()
 #aplicar_css_global()
 st.header("Gerenciamento de Usuários")
