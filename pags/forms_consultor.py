@@ -247,7 +247,7 @@ elif pills == "Nova Visita":
                 inserir_visita(id_condominio, dataInicial, dataFinal, st.session_state['username'], tipo_forms, subtipo_forms, json.dumps(response, ensure_ascii=False))
 
                 st.success("Formulário enviado com sucesso!")
-                time.sleep(0.7)
+                sleep(0.7)
                 st.rerun()
 
                 
