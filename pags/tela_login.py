@@ -23,8 +23,7 @@ def tela_login():
         with s2: submitted = st.form_submit_button("Login")
 
         if submitted:
-            print(f"{username}@Mudar123")
-            print(password)
+            
             role = autenticar_usuario(username.lower(), password)
 
             if role:
