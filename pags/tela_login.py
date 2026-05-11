@@ -27,7 +27,8 @@ def tela_login():
             role = autenticar_usuario(username.lower(), password)
 
             if role:
-                if password == f"{username}@Mudar123":
+                user_reset = username.lower().split('.')[0]
+                if password == f"{user_reset}@AltoValor":
                     mudar_senha(username)
                 else:
                     st.session_state['role'] = role

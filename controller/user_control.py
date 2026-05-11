@@ -3,9 +3,11 @@ import pandas as pd
 import bcrypt
 
 def criar_usuario(nome, username, perfil):
-    password = username + "@Mudar123"
+    
     nome = nome.title()
     username = username.lower()
+    user_reset = username.split('.')[0]
+    password = user_reset + "@AltoValor"
     senha = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     conn = conecta_supabase()
     cursor = conn.cursor()
@@ -100,7 +102,8 @@ def validar_repeticao(nome, username):
         return True
 
 def resetar_senha(id, username):
-    password = username + "@Mudar123"
+    user_reset = username.split('.')[0]
+    password = user_reset + "@AltoValor"
     senha = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     conn = conecta_supabase()
     cursor = conn.cursor()

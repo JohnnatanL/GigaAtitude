@@ -1,5 +1,6 @@
 import datetime
 from auth import conecta_supabase
+import pandas as pd
 
 def get_condominios():
 
@@ -80,3 +81,57 @@ def inserir_visita(id_condominio, data_inicio, data_fim, usuario, tipo_forms, su
 
     cursor.close()
     conn.close()
+
+def get_visitas(usuarios):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    query = """select 
+concat(c.nome, ' (',
+            c.cidade, '-',
+            c.sigla_estado, ', ',
+            c.bairro, ', ',
+            c.logradouro, ', ',
+            c.numero, ', ',
+            c.cep, ')') as condominio,
+to_char(v.dt_inicio, 'DD/MM/YYYY HH24:MI') as "Data Inicio",
+to_char(v.dt_inicio, 'DD/MM/YYYY HH24:MI') as "Data Fim",
+v.usuario as Usuario,
+v.response 
+FROM tbvisita v
+left join tb_condominio c on v.id_condominio = c.id
+where usuario in (%s);"""
+
+    cursor.execute(query, (usuarios,))
+    result = cursor.fetchall()
+
+    df = pd.DataFrame(result, columns=[desc[0] for desc in cursor.description])
+
+    cursor.close()
+    conn.close()
+
+    return df
+
+def get_consultores(gestor, dt_inicio, dt_fim):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    query = """SELECT
+        distinct(concat(u.nome, ' (', u.username, ')'))
+    FROM tbusuarios u
+    LEFT JOIN tbhierarquia h on u.id = h.id_usuario
+    WHERE (h.gestor_direto = %s) and (h.periodo between %s and %s);"""
+
+    cursor.execute(query, (gestor, dt_inicio, dt_fim))
+    result = cursor.fetchall()
+
+    lista = []
+    for row in result:
+        lista.append(row[0])
+
+    cursor.close()
+    conn.close()
+
+    return lista
+
+    

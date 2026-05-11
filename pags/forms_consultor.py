@@ -2,12 +2,15 @@ from controller.controller import inserir_visita
 import streamlit as st
 from controller.controller import (get_condominios,
                                     round_to_quarter,
-                                    get_id_condominio)
-import datetime
+                                    get_id_condominio,
+                                    get_visitas,
+                                    get_consultores)
 import pandas as pd
 from datetime import datetime
+import datetime as dt
 from auth import conecta_supabase
 import json
+from time import sleep
 
 # ── Configuração da página ──────────────────────────────────────────────────
 st.set_page_config(
@@ -20,7 +23,67 @@ st.title("👋 :grey[Visita Comercial]")
 
 pills = st.pills(label="", options=["Nova Visita", "Histórico de Visitas"])
 
-if pills == "Nova Visita":
+if pills == "Histórico de Visitas":
+    with st.form("hist_visita"):
+
+        cola, colb = st.columns([1, 5])
+
+        with cola:
+            data = st.date_input(
+                "Selecione o período",
+                value=[
+                    pd.to_datetime("today").replace(day=1),
+                    pd.to_datetime("today"),
+                ],
+                format="DD.MM.YYYY",
+                width=200,
+            )
+
+            try:
+                data_inicial = data[0]
+                data_final = data[1]
+
+            except:
+                st.info("Selecione um período válido!", icon="⚠️")
+
+        with colb:
+
+            if st.session_state['role'] == "gestao" and data_inicial and data_final:
+
+                consultores = get_consultores(
+                    st.session_state['username'],
+                    data_inicial,
+                    data_final
+                )
+
+                if consultores:
+                    consultor = st.multiselect(
+                        "Consultor",
+                        options=consultores,
+                        key="consultor",
+                        default=consultores
+                    )
+                else:
+                    st.warning("Nenhum consultor encontrado")
+
+            elif st.session_state['role'] == 'consultor':
+
+                consultor = st.selectbox(
+                    "Consultor",
+                    options=[st.session_state['username']],
+                    key="consultor"
+                )
+
+        submitted = st.form_submit_button("Enviar")
+        if submitted:
+            df_visitas = pd.DataFrame()
+            for c in consultor:
+                username = c.split('(')[1].replace(')', '')
+                df_visitas = pd.concat([df_visitas, get_visitas(username)])
+            st.dataframe(df_visitas, use_container_width=True)
+
+
+elif pills == "Nova Visita":
     with st.form("nova_visita"):
         tipo_forms = "Teste"
         subtipo_forms = "Teste_Fortaleza"
@@ -120,14 +183,13 @@ if pills == "Nova Visita":
         
         submitted = st.form_submit_button("Enviar")
         if submitted:
-            st.success("Formulário enviado com sucesso!")
 
             dataInicial = datetime.combine(dt_inicio, hr_inicio)
             dataFinal = datetime.combine(dt_fim, hr_fim)
 
-            if dataInicial > dataFinal:
-                st.error("Data inicial deve ser menor que data final")
-            elif not(dt_inicio, hr_inicio, dt_fim, hr_fim, condominio, torres, andares, apto_andar, permuta, concorrencia):
+            if dataInicial >= dataFinal:
+                st.error("Data inicial deve ser anterior à data final")
+            elif not all([dt_inicio, hr_inicio, dt_fim, hr_fim, condominio, torres, andares, apto_andar, permuta, concorrencia]):
                 st.error("Preencha todos os campos obrigatórios")
             else:
                 id_condominio = get_id_condominio(condominio)
@@ -138,19 +200,54 @@ if pills == "Nova Visita":
                     "permuta": permuta,
                     "concorrencia": concorrencia,
                     "outros_conc": outros_conc,
-                    "contatos": 
-                        [
-                            {"Nome": i[0], "Cargo": i[1], "Telefone": i[2], "Email": i[3]} 
-                            for i in contatos.itertuples() 
-                        ],
-                    "parceiros": 
-                        [
-                            {"Nome da Empresa": i[0], "Tipo de Negócio": i[1], "Pessoa de Contato": i[2], "Telefone do Parceiro": i[3]} 
-                            for i in parceiros.itertuples()
-                        ],
                 }
+
+                # Contatos
+                lista_contatos = [
+                    {
+                        "cid": i[0],
+                        "Nome": i[1],
+                        "Cargo": i[2],
+                        "Telefone": i[3],
+                        "Email": i[4],
+                    }
+                    for i in contatos.itertuples()
+                    if any([
+                        str(i[1]).strip(),
+                        str(i[2]).strip(),
+                        str(i[3]).strip(),
+                        str(i[4]).strip()
+                    ])
+                ]
+
+                if lista_contatos:
+                    response["contatos"] = lista_contatos
+
+                # Parceiros
+                lista_parceiros = [
+                    {
+                        "pid": i[0],
+                        "Nome da Empresa": i[1],
+                        "Tipo de Negócio": i[2],
+                        "Pessoa de Contato": i[3],
+                        "Telefone do Parceiro": i[4],
+                    }
+                    for i in parceiros.itertuples()
+                    if any([
+                        str(i[1]).strip(),
+                        str(i[2]).strip(),
+                        str(i[3]).strip(),
+                        str(i[4]).strip()
+                    ])
+                ]
+
+                if lista_parceiros:
+                    response["parceiros"] = lista_parceiros
 
                 inserir_visita(id_condominio, dataInicial, dataFinal, st.session_state['username'], tipo_forms, subtipo_forms, json.dumps(response, ensure_ascii=False))
 
+                st.success("Formulário enviado com sucesso!")
+                time.sleep(0.7)
+                st.rerun()
 
                 
