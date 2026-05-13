@@ -53,6 +53,8 @@ def vendas():
     and ano = 2026
     and mes >= 5"""
 
+    print(query)
+
     cursor.execute(query)
     result = cursor.fetchall()
 
@@ -87,6 +89,3 @@ group by c.id, c.nome, c.cep, c.numero, v.usuario;"""
     df_vendas = vendas()
 
     return df_visitas, df_vendas
-
-
-#print(buscar_vendedores())

@@ -204,7 +204,7 @@ elif pills == "Histórico de Visitas":
 
 
             st.subheader("Visitas")
-            st.dataframe(df_visitas, use_container_width=True)
+            st.dataframe(df_visitas, use_container_width=True, hide_index=True)
 
 
 elif pills == "Nova Visita":
