@@ -1,10 +1,13 @@
 from controller.controller import inserir_visita
+import numpy as np
 import streamlit as st
 from controller.controller import (get_condominios,
                                     round_to_quarter,
                                     get_id_condominio,
                                     get_visitas,
-                                    get_consultores)
+                                    get_visita_by_id,
+                                    get_consultores,
+                                    update_visita)
 import pandas as pd
 from datetime import datetime
 import datetime as dt
@@ -19,11 +22,124 @@ st.set_page_config(
     layout="wide",
 )
 
+@st.dialog("Detalhes da Visita", width="medium")
+def mostrar_detalhes(id_visita):
+    visita = get_visita_by_id(id_visita)
+
+    f = visita.loc[
+        visita["id"] == id_visita
+    ].iloc[0]
+    st.markdown(f"**Condominio:** {f['condominio']}")
+    coll1, coll2 = st.columns(2)
+    with coll1: st.markdown(f"**Data de Início:** {f['dt_inicio'].strftime('%d/%m/%Y %H:%M')}")
+    with coll2: st.markdown(f"**Data de Término:** {f['dt_fim'].strftime('%d/%m/%Y %H:%M')}")
+
+
+    df_contatos = pd.DataFrame([
+        {
+            "Nome": "",
+            "Cargo": "",
+            "Telefone": "",
+            "Email": "",
+        }]
+    )
+
+    contatos = st.data_editor(
+        df_contatos,
+        column_config={
+            "Nome": st.column_config.TextColumn("Nome"),
+            "Cargo": st.column_config.SelectboxColumn(
+                "Cargo",
+                options=[
+                    'Síndico', 
+                    'Administrador', 
+                    'Porteiro', 
+                    'Zelador', 
+                    'Segurança',
+                    'Outro'
+                ],
+                required=True,
+            ),
+            "Telefone": st.column_config.TextColumn("Telefone"),
+            "E-mail": st.column_config.TextColumn("E-mail"),
+        },
+        hide_index=True,
+        num_rows="dynamic",
+        key="contatos",
+            )
+
+    # Contatos
+    lista_contatos = [
+        {
+            "cid": i[0],
+            "Nome": i[1],
+            "Cargo": i[2],
+            "Telefone": i[3],
+            "Email": i[4],
+        }
+        for i in contatos.itertuples()
+        if any([
+            str(i[1]).strip(),
+            str(i[2]).strip(),
+            str(i[3]).strip(),
+            str(i[4]).strip()
+        ])
+    ]
+
+    response = visita['response'].iloc[0]
+
+    if isinstance(response, str):
+        response = json.loads(response)
+
+    if lista_contatos:
+        response["contatos"] = lista_contatos
+
+    if st.button("Salvar Contatos"):
+        update_visita(id_visita, json.dumps(response, ensure_ascii=False))
+        st.success("Contatos salvos com sucesso!")
+        sleep(0.7)
+        st.rerun()
+
+
 st.title("👋 :grey[Visita Comercial]")
 
-pills = st.pills(label="", options=["Nova Visita", "Histórico de Visitas"])
+pills = st.pills(label="", options=["Nova Visita", "Histórico de Visitas", "Editar Visitas"])
 
-if pills == "Histórico de Visitas":
+if pills == "Editar Visitas":
+
+    if st.session_state['role'] == "consultor":
+
+        username = st.session_state['username']
+        df_visitas = get_visitas(username)
+
+        df_visitas['contacts'] = np.select(
+            [df_visitas['Contatos'] == ' -  - ', df_visitas['Contatos'].isnull()],
+            ["Sem Contato", "Sem Contato"],
+            default=df_visitas['Contatos']
+        )
+
+        df_editar_visitas = df_visitas[
+            df_visitas['contacts'] == 'Sem Contato'
+        ][['idVisita', 'condominio', 'Data Inicio', 'Data Fim', 'Usuario', 'contacts']]
+
+        if df_editar_visitas.empty:
+            st.info("Nenhum visita sem contato.", icon="ℹ️")
+            st.stop()
+        else:
+            for _, row in df_editar_visitas.iterrows():
+                col1, col2, col3, col4, col5, col6 = st.columns([1, 3, 1, 1, 1, 1])
+                col1.write(row["idVisita"])
+                col2.write(row["condominio"])
+                col3.write(row["Data Inicio"])
+                col4.write(row["Data Fim"])
+                col5.write(row["Usuario"])
+
+                if col6.button(
+                    "🔍 Detalhes", key=f"detalhes_{row['idVisita']}", width="stretch"
+                ):
+                    mostrar_detalhes(row["idVisita"])
+
+elif pills == "Histórico de Visitas":
     with st.form("hist_visita"):
 
         cola, colb = st.columns([1, 5])
@@ -77,9 +193,17 @@ if pills == "Histórico de Visitas":
         submitted = st.form_submit_button("Enviar")
         if submitted:
             df_visitas = pd.DataFrame()
-            for c in consultor:
-                username = c.split('(')[1].replace(')', '')
+            if st.session_state['role'] == 'consultor':
+                username = st.session_state['username']
                 df_visitas = pd.concat([df_visitas, get_visitas(username)])
+            elif st.session_state['role'] == 'gestao':
+                for c in consultor:
+                    username = c.split('(')[1].replace(')', '')
+                    df_visitas = pd.concat([df_visitas, get_visitas(username)])
+
+
+
+            st.subheader("Visitas")
             st.dataframe(df_visitas, use_container_width=True)
 
 
@@ -108,15 +232,13 @@ elif pills == "Nova Visita":
         with c2: outros_conc = st.text_input("Outros", key="outros_conc")
         
         with st.expander("Contatos"):
-            df_contatos = pd.DataFrame(
-                [
-                    {
-                        "Nome": "",
-                        "Cargo": "",
-                        "Telefone": "",
-                        "Email": "",
-                    },
-                ]
+            df_contatos = pd.DataFrame([
+                {
+                    "Nome": "",
+                    "Cargo": "",
+                    "Telefone": "",
+                    "Email": "",
+                }]
             )
 
             contatos = st.data_editor(
@@ -144,15 +266,12 @@ elif pills == "Nova Visita":
             )
 
         with st.expander("Parceiros"):
-            df_parceiros = pd.DataFrame(
-                [
-                    {
-                        "Nome da Empresa": "",
-                        "Tipo de Negócio": "",
-                        "Pessoa de Contato": "",
-                        "Telefone do Parceiro": "",
-                    },
-                ]
+            df_parceiros = pd.DataFrame([{
+                    "Nome da Empresa": "",
+                    "Tipo de Negócio": "",
+                    "Pessoa de Contato": "",
+                    "Telefone do Parceiro": "",
+                }]
             )
             parceiros = st.data_editor(
                 df_parceiros,

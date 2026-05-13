@@ -87,17 +87,52 @@ def get_visitas(usuarios):
     cursor = conn.cursor()
 
     query = """select 
-concat(c.nome, ' (',
-            c.cidade, '-',
-            c.sigla_estado, ', ',
-            c.bairro, ', ',
-            c.logradouro, ', ',
-            c.numero, ', ',
-            c.cep, ')') as condominio,
-to_char(v.dt_inicio, 'DD/MM/YYYY HH24:MI') as "Data Inicio",
-to_char(v.dt_inicio, 'DD/MM/YYYY HH24:MI') as "Data Fim",
-v.usuario as Usuario,
-v.response 
+    v.id as "idVisita",
+    concat(
+        c.nome, ' (',
+        c.cidade, '-',
+        c.sigla_estado, ', ',
+        c.bairro, ', ',
+        c.logradouro, ', ',
+        c.numero, ', ',
+        c.cep, ')'
+    ) as condominio,
+    to_char(v.dt_inicio, 'DD/MM/YYYY HH24:MI') as "Data Inicio",
+    to_char(v.dt_fim, 'DD/MM/YYYY HH24:MI') as "Data Fim",
+    v.usuario as "Usuario",
+    v.response->>'qtde_torres'     AS "QtdeTorres",
+    v.response->>'qtde_andares'    AS "QtdeAndares",
+    v.response->>'qtde_apto_andar' AS "QtdeAptoPorAndar",
+    v.response->>'permuta'         AS "Permuta",
+    (
+        SELECT string_agg(valor, ' | ')
+        FROM jsonb_array_elements_text(v.response::jsonb->'concorrencia') AS valor
+    ) AS "Concorrencia",
+    (
+        SELECT string_agg(
+            concat_ws(
+                ' - ',
+                contato->>'Nome',
+                contato->>'Cargo',
+                contato->>'Telefone'
+            ),
+            ' | '
+        )
+        FROM jsonb_array_elements(v.response::jsonb->'contatos') AS contato
+    ) AS "Contatos",
+    (
+        SELECT string_agg(
+            concat_ws(
+                ' - ',
+                parceiro->>'Nome da Empresa',
+                parceiro->>'Tipo de Negócio',
+                parceiro->>'Pessoa de Contato',
+                parceiro->>'Telefone do Parceiro'
+            ),
+            ' | '
+        )
+        FROM jsonb_array_elements(v.response::jsonb->'parceiros') AS parceiro
+    ) AS "Parceiros"
 FROM tbvisita v
 left join tb_condominio c on v.id_condominio = c.id
 where usuario in (%s);"""
@@ -134,4 +169,44 @@ def get_consultores(gestor, dt_inicio, dt_fim):
 
     return lista
 
-    
+def get_visita_by_id(id_visita):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+    query = """select
+        concat(
+            c.nome, ' (',
+            c.cidade, '-',
+            c.sigla_estado, ', ',
+            c.bairro, ', ',
+            c.logradouro, ', ',
+            c.numero, ', ',
+            c.cep, ')'
+        ) as condominio,
+        v.*
+    FROM tbvisita v
+    left JOIN tb_condominio c on v.id_condominio = c.id
+    where v.id = %s;"""
+
+    cursor.execute(query, (id_visita,))
+    result = cursor.fetchall()
+
+    df = pd.DataFrame(result, columns=[desc[0] for desc in cursor.description])
+
+    cursor.close()
+    conn.close()
+
+    return df
+
+def update_visita(id_visita, response):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    query = """UPDATE tbvisita
+    SET response = %s
+    WHERE id = %s;"""
+
+    cursor.execute(query, (response, id_visita))
+    conn.commit()
+
+    cursor.close()
+    conn.close()

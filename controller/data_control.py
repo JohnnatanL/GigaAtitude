@@ -1,5 +1,13 @@
 import pandas as pd
 from auth import conecta_databricks
+import streamlit as st
+from controller.controller import (
+    get_condominios,
+    round_to_quarter,
+    get_id_condominio,
+    get_visitas,
+    get_consultores
+)
 
 def vendas():
     conn = conecta_databricks()
