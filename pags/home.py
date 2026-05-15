@@ -3,7 +3,7 @@ from controller.hidden import hidden
 from stylo.css import aplicar_css_global
 
 st.set_page_config(layout="wide",
-                   initial_sidebar_state="expanded")
+                   initial_sidebar_state="collapsed")
 hidden()
 #aplicar_css_global()
 

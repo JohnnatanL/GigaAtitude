@@ -258,7 +258,7 @@ elif pills == "Nova Visita":
                         required=True,
                     ),
                     "Telefone": st.column_config.TextColumn("Telefone"),
-                    "E-mail": st.column_config.TextColumn("E-mail"),
+                    "E-mail": st.column_config.TextColumn("Email"),
                 },
                 hide_index=True,
                 num_rows="dynamic",
@@ -301,30 +301,16 @@ elif pills == "Nova Visita":
             )
 
         observacoes = st.text_area("Observações", key="observacoes")
+
+        status_entrada = st.selectbox("Status Entrada", ["Autorizado", "Sem Autorização", "Pendente Autorização"])
         
         submitted = st.form_submit_button("Enviar")
         if submitted:
 
             dataInicial = datetime.combine(dt_inicio, hr_inicio)
             dataFinal = datetime.combine(dt_fim, hr_fim)
-
-            if dataInicial >= dataFinal:
-                st.error("Data inicial deve ser anterior à data final")
-            elif not all([dt_inicio, hr_inicio, dt_fim, hr_fim, condominio, torres, andares, apto_andar, permuta, concorrencia]):
-                st.error("Preencha todos os campos obrigatórios")
-            else:
-                id_condominio = get_id_condominio(condominio)
-                response = {
-                    "qtde_torres": torres,
-                    "qtde_andares": andares,
-                    "qtde_apto_andar": apto_andar,
-                    "permuta": permuta,
-                    "concorrencia": concorrencia,
-                    "outros_conc": outros_conc,
-                }
-
-                # Contatos
-                lista_contatos = [
+            # Contatos
+            lista_contatos = [
                     {
                         "cid": i[0],
                         "Nome": i[1],
@@ -340,12 +326,8 @@ elif pills == "Nova Visita":
                         str(i[4]).strip()
                     ])
                 ]
-
-                if lista_contatos:
-                    response["contatos"] = lista_contatos
-
-                # Parceiros
-                lista_parceiros = [
+            # Parceiros
+            lista_parceiros = [
                     {
                         "pid": i[0],
                         "Nome da Empresa": i[1],
@@ -362,10 +344,33 @@ elif pills == "Nova Visita":
                     ])
                 ]
 
+
+            if dataInicial >= dataFinal:
+                st.error("Data inicial deve ser anterior à data final")
+            elif not all([dt_inicio, hr_inicio, dt_fim, hr_fim, condominio, torres, andares, apto_andar, permuta, concorrencia]):
+                st.error("Preencha os campos obrigatórios")
+            elif not lista_contatos:
+                st.error("Preencha pelo menos um contato")
+            elif not status_entrada:
+                st.error("Informe sobre status da entrada no local.")
+            else:
+                id_condominio = get_id_condominio(condominio)
+                response = {
+                    "qtde_torres": torres,
+                    "qtde_andares": andares,
+                    "qtde_apto_andar": apto_andar,
+                    "permuta": permuta,
+                    "concorrencia": concorrencia,
+                    "outros_conc": outros_conc,
+                }
+
+                if lista_contatos:
+                    response["contatos"] = lista_contatos
+
                 if lista_parceiros:
                     response["parceiros"] = lista_parceiros
 
-                inserir_visita(id_condominio, dataInicial, dataFinal, st.session_state['username'], tipo_forms, subtipo_forms, json.dumps(response, ensure_ascii=False), observacoes)
+                inserir_visita(id_condominio, dataInicial, dataFinal, st.session_state['username'], tipo_forms, subtipo_forms, json.dumps(response, ensure_ascii=False), observacoes, status_entrada)
 
                 st.success("Formulário enviado com sucesso!")
                 sleep(0.7)
