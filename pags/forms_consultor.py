@@ -299,6 +299,8 @@ elif pills == "Nova Visita":
                 num_rows="dynamic",
                 key="parceiros",
             )
+
+        observacoes = st.text_area("Observações", key="observacoes")
         
         submitted = st.form_submit_button("Enviar")
         if submitted:
@@ -363,7 +365,7 @@ elif pills == "Nova Visita":
                 if lista_parceiros:
                     response["parceiros"] = lista_parceiros
 
-                inserir_visita(id_condominio, dataInicial, dataFinal, st.session_state['username'], tipo_forms, subtipo_forms, json.dumps(response, ensure_ascii=False))
+                inserir_visita(id_condominio, dataInicial, dataFinal, st.session_state['username'], tipo_forms, subtipo_forms, json.dumps(response, ensure_ascii=False), observacoes)
 
                 st.success("Formulário enviado com sucesso!")
                 sleep(0.7)

@@ -61,7 +61,7 @@ def get_id_condominio(nome_condominio):
 
     return result[0]
 
-def inserir_visita(id_condominio, data_inicio, data_fim, usuario, tipo_forms, subtipo_forms, response):
+def inserir_visita(id_condominio, data_inicio, data_fim, usuario, tipo_forms, subtipo_forms, response, observacoes):
     conn = conecta_supabase()
     cursor = conn.cursor()
 
@@ -72,11 +72,12 @@ def inserir_visita(id_condominio, data_inicio, data_fim, usuario, tipo_forms, su
                                     usuario,
 									tipo_forms,
 									subtipo_forms,
-                                    response
+                                    response,
+                                    observacoes
 									)
-				VALUES (%s, %s, %s, %s, %s, %s, %s);"""
+				VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"""
     
-    cursor.execute(query, (id_condominio, data_inicio, data_fim, usuario, tipo_forms, subtipo_forms, response))
+    cursor.execute(query, (id_condominio, data_inicio, data_fim, usuario, tipo_forms, subtipo_forms, response, observacoes))
     conn.commit()
 
     cursor.close()

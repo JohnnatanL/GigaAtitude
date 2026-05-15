@@ -2,9 +2,9 @@ import streamlit as st
 from pags.tela_login import tela_login
 
 # Paginas
-home = st.Page("pags/home.py", title="Inicio", icon="🏠", default=True)
+home = st.Page("pags/home.py", title="Inicio", icon="🏠")
 
-forms_consultor = st.Page("pags/forms_consultor.py", title="Formulário de Visita Comercial", icon="📋")
+forms_consultor = st.Page("pags/forms_consultor.py", title="Formulário de Visita Comercial", icon="📋", default=True)
 gerenc_users = st.Page("pags/gerenc_users.py", title="Gerenciamento de Usuários", icon="👥")
 rel_muralha = st.Page("pags/vendas_du.py", title="Relatório - Projeto Muralha", icon="🎯")
 
