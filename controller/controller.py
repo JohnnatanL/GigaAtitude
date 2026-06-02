@@ -2,7 +2,10 @@ import datetime
 from auth import conecta_supabase
 import pandas as pd
 
-def get_condominios():
+def get_condominios(username):
+
+    if username in {'silvania.andrade', 'arthur.wigner', 'nayuri.ferreira',
+        'antonia.moreira', 'felipe.ronaldy', 'basilio.junior', 'tatiana.alianca'}
 
     conn = conecta_supabase()
     cursor = conn.cursor()
