@@ -219,7 +219,7 @@ elif pills == "Nova Visita":
         with a2: dt_fim = st.date_input("Data de Término",key="dt_fim", format="DD/MM/YYYY")
         with a3: hr_fim = st.time_input("Hora de Término", key="hr_fim", value=round_to_quarter().time())
         
-        condominio = st.selectbox("Condomínio", options=get_condominios(), placeholder="Selecione condomínio", key="condominio")
+        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username']), placeholder="Selecione condomínio", key="condominio")
 
         b0, b1, b2, b3 = st.columns([1, 1, 1, 5])
         with b0: torres = st.number_input("Qtde Torres", key="qtde_torres", min_value=1, step=1)

@@ -5,12 +5,18 @@ import pandas as pd
 def get_condominios(username):
 
     if username in {'silvania.andrade', 'arthur.wigner', 'nayuri.ferreira',
-        'antonia.moreira', 'felipe.ronaldy', 'basilio.junior', 'tatiana.alianca'}
+        'antonia.moreira', 'felipe.ronaldy', 'basilio.junior', 'tatiana.alianca'}:
+        where = "and c.cidade in ('Fortaleza') and c.estado = 'Ceará'"
+    elif username in {'mariane.sobreira', 'renata.liberato', 'gislene.souza',
+                        'ricardo.batista', 'cairene.santana', 'victor.galdeano', 'ruan.fontes'}:
+        where = """and c.cidade in ('Guarujá', 'Santos', 'Praia Grande') and c.estado = 'São Paulo'"""
+    else:
+        where = """and 1 = 1"""
 
     conn = conecta_supabase()
     cursor = conn.cursor()
 
-    query = """select
+    query = f"""select
         concat(c.nome, ' (',
             c.cidade, '-',
             c.sigla_estado, ', ',
@@ -20,7 +26,8 @@ def get_condominios(username):
             c.cep, ')'
             )
         FROM tb_condominio c
-        where c.status = '11 - Liberado para venda';
+        where c.status = '11 - Liberado para venda'
+        {where};
     """
 
     cursor.execute(query)
