@@ -1,6 +1,12 @@
 import datetime
 from auth import conecta_supabase
 import pandas as pd
+import re
+
+def limpa_telefone(telefone):
+    if telefone is None:
+        return None
+    return re.sub(r'\D', '', str(telefone))
 
 def get_condominios(username):
 
@@ -222,3 +228,146 @@ def update_visita(id_visita, response):
 
     cursor.close()
     conn.close()
+
+def validar_lead_repetido(condominio, telefone, banco):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    id_condominio = get_id_condominio(condominio)
+    telefone_limpo = limpa_telefone(telefone)
+
+    if banco =="tbleads":
+        query = """select *
+        from tbleads
+        where id_condominio = %s
+        and telefone = %s;"""
+    elif banco =="tbficha":
+        query = """select *
+        from tbficha
+        where id_condominio = %s
+        and telefone = %s;"""
+    cursor.execute(query, (id_condominio, telefone_limpo))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if result:
+        return True
+    else:
+        return False
+
+def inserir_leads(condominio, nome, telefone, apt_bloco, vendedor):
+
+    id_condominio = get_id_condominio(condominio)
+    telefone_limpo = limpa_telefone(telefone)
+
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    query = """INSERT INTO tbleads (
+                id_condominio,
+                nome,
+                telefone,
+                bloco_apt,
+                vendedor
+                )
+                VALUES (%s, %s, %s, %s, %s);"""
+    cursor.execute(query, (id_condominio, nome, telefone_limpo, apt_bloco, vendedor))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def inserir_ficha(condominio, nome, cargo, telefone, torres, andares, apt_andar, hp_inf, hf, vendedor):
+    id_condominio = get_id_condominio(condominio)
+    telefone_limpo = limpa_telefone(telefone)
+
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    hp_real = torres * andares * apt_andar
+
+    query = """INSERT INTO tbficha (
+                id_condominio,
+                nome,
+                cargo,
+                telefone,
+                torres,
+                andares,
+                apt_andar,
+                hp_inf,
+                hf,
+                vendedor,
+                hp
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+    cursor.execute(query, (id_condominio, nome, cargo, telefone_limpo, torres, andares, apt_andar, hp_inf, hf, vendedor, hp_real))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def inserir_checkin(condominio, dt_inicio, dt_fim, vendedor):
+    id_condominio = get_id_condominio(condominio)
+
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    status = False
+    query = """INSERT INTO tbacao (
+                id_condominio,
+                dt_inicio,
+                dt_fim,
+                vendedor,
+                status
+                )
+                VALUES (%s, %s, %s, %s, %s);"""
+    cursor.execute(query, (id_condominio, dt_inicio, dt_fim, vendedor, status))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def ler_checkout(vendedor):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+    query = """
+    select concat_ws(' | ',
+    a.id,
+    concat('Condominio: ',c.nome),
+    concat('Data Inicio: ', TO_CHAR(a.dt_inicio, 'DD/MM/YYYY HH24:MI')),
+    concat('Data Fim: ', TO_CHAR(a.dt_fim, 'DD/MM/YYYY HH24:MI'))
+    ) as valor
+    from tbacao a
+    left join tb_condominio c on a.id_condominio = c.id
+    where a.status = False and
+    a.vendedor = %s;"""
+    cursor.execute(query, (vendedor,))
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    df = pd.DataFrame(result, columns=["valor"])
+    return df
+    
+def inserir_checkout(id, leads, vendas):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+    
+    query = """UPDATE tbacao
+    SET status = True,
+    leads = %s,
+    vendas = %s
+    WHERE id = %s;"""
+    cursor.execute(query, (leads, vendas, id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+
+    
+    
+
+
+

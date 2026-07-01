@@ -7,7 +7,8 @@ from controller.controller import (get_condominios,
                                     get_visitas,
                                     get_visita_by_id,
                                     get_consultores,
-                                    update_visita)
+                                    update_visita,
+                                    inserir_leads, validar_lead_repetido, inserir_ficha, inserir_checkin, ler_checkout, inserir_checkout)
 import pandas as pd
 from datetime import datetime
 import datetime as dt
@@ -103,41 +104,28 @@ def mostrar_detalhes(id_visita):
 
 st.title("👋 :grey[Visita Comercial]")
 
-pills = st.pills(label="", options=["Nova Visita", "Histórico de Visitas", "Editar Visitas"])
+pills = st.pills(label="", options=["Nova Visita", "Histórico de Visitas", "Ficha Cadastral", "Cadastro de Leads", "Checkin Plantão", "Checkout Plantão", "Permutas"])
 
-if pills == "Editar Visitas":
-
-    if st.session_state['role'] == "consultor":
-
-        username = st.session_state['username']
-        df_visitas = get_visitas(username)
-
-        df_visitas['contacts'] = np.select(
-            [df_visitas['Contatos'] == ' -  - ', df_visitas['Contatos'].isnull()],
-            ["Sem Contato", "Sem Contato"],
-            default=df_visitas['Contatos']
-        )
-
-        df_editar_visitas = df_visitas[
-            df_visitas['contacts'] == 'Sem Contato'
-        ][['idVisita', 'condominio', 'Data Inicio', 'Data Fim', 'Usuario', 'contacts']]
-
-        if df_editar_visitas.empty:
-            st.info("Nenhum visita sem contato.", icon="ℹ️")
-            st.stop()
-        else:
-            for _, row in df_editar_visitas.iterrows():
-                col1, col2, col3, col4, col5, col6 = st.columns([1, 3, 1, 1, 1, 1])
-                col1.write(row["idVisita"])
-                col2.write(row["condominio"])
-                col3.write(row["Data Inicio"])
-                col4.write(row["Data Fim"])
-                col5.write(row["Usuario"])
-
-                if col6.button(
-                    "🔍 Detalhes", key=f"detalhes_{row['idVisita']}", width="stretch"
-                ):
-                    mostrar_detalhes(row["idVisita"])
+if pills == "Cadastro de Leads":
+    with st.form("cadastro_leads"):
+        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username']), placeholder="Selecione condomínio", key="condominio")
+        nome = st.text_input("Nome", key="nome")
+        telefone = st.text_input("Telefone", key="telefone")
+        apt_bloco = st.text_input("Apartamento/Bloco", key="apt_bloco")
+        
+        if st.form_submit_button("Salvar"):
+            if st.session_state['condominio'] and st.session_state['nome'] and st.session_state['telefone'] and st.session_state['apt_bloco']:
+                if validar_lead_repetido(st.session_state['condominio'], st.session_state['telefone'], "tbleads") == True:
+                    st.error("Lead já cadastrado!", icon="⚠️")
+                    sleep(1)
+                    st.rerun()
+                else:
+                    inserir_leads(st.session_state['condominio'], st.session_state['nome'], st.session_state['telefone'], st.session_state['apt_bloco'], st.session_state['username'])
+                    st.success("Lead salvo com sucesso!")
+                    sleep(0.7)
+                    st.rerun()
+            else:
+                st.error("Preencha todos os campos!")
 
 elif pills == "Histórico de Visitas":
     with st.form("hist_visita"):
@@ -375,5 +363,83 @@ elif pills == "Nova Visita":
                 st.success("Formulário enviado com sucesso!")
                 sleep(0.7)
                 st.rerun()
-
                 
+elif pills == "Ficha Cadastral":
+    with st.form("Ficha Cadastral"):
+        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username']), placeholder="Selecione condomínio", key="condominio_ficha")
+        nome = st.text_input("Nome", key="nome_ficha")
+        cargo = st.selectbox("Cargo", options=["Síndico", "Administrador", "Porteiro", "Zelador", "Segurança", "Outro"], key="cargo_ficha")
+        telefone = st.text_input("Telefone", key="telefone_ficha")
+
+        a, b, c, d, e = st.columns(5)
+        with a: torres = st.number_input("Torres", key="torres_ficha", value=1, min_value=1, max_value=999, step=1)
+        with b: andares = st.number_input("Andares", key="andares_ficha", value=1, min_value=1, max_value=999, step=1)
+        with c: apt_andar = st.number_input("Apt por Andar", key="apt_andar", value=1, min_value=1, max_value=999, step=1)
+        with d: hp = st.number_input("HP", key="hp", value=1, min_value=1, max_value=999, step=1)
+        with e: hf = st.number_input("HF", key="hf", value=8, min_value=8, max_value=999, step=8)
+
+        if st.form_submit_button("Salvar"):
+            if condominio and nome and cargo and telefone:
+                if validar_lead_repetido(condominio, telefone, "tbficha") == True:
+                    st.error("Contato já cadastrado!", icon="⚠️")
+                    sleep(1)
+                    st.rerun()
+                else:
+                    inserir_ficha(condominio, nome, cargo, telefone, torres, andares, apt_andar, hp, hf, st.session_state['username'])
+                    st.success("Contato salvo com sucesso!")
+                    sleep(0.7)
+                    st.rerun()
+            else:
+                st.error("Preencha todos os campos!")
+
+elif pills == "Checkin Plantão":
+    with st.form("Checkin Plantão"):
+        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username']), placeholder="Selecione condomínio", key="condominio_checkin")
+        
+        a, b, c = st.columns([2, 1, 6])
+        with a: dt_inicio = st.date_input("Data Inicio", key="data_checkin")
+        with b: hr_inicio = st.time_input("Hor Inicio", key="hora_checkin")
+
+        a, b, c = st.columns([2, 1, 6])
+        with a: dt_fim = st.date_input("Data Fim", key="data_checkout")
+        with b: hr_fim = st.time_input("Hora Fim", key="hora_checkout")
+
+        if st.form_submit_button("Salvar"):
+            if condominio and dt_inicio and hr_inicio and dt_fim and hr_fim:
+                dataInicial = datetime.combine(dt_inicio, hr_inicio)
+                dataFinal = datetime.combine(dt_fim, hr_fim)
+                if dataInicial >= dataFinal:
+                    st.error("Data inicial deve ser anterior à data final")
+                else:
+                    inserir_checkin(condominio, dataInicial, dataFinal, st.session_state['username'])
+                    st.success("Checkin salvo com sucesso!")
+                    sleep(0.7)
+                    st.rerun()
+            else:
+                st.error("Preencha todos os campos!")
+
+elif pills == "Checkout Plantão":
+    with st.form("Checkout Plantão"):
+        df_checkin = ler_checkout(st.session_state['username'])
+
+        checkin = st.selectbox("Checkin Plantão", options=df_checkin["valor"], key="id_checkout")
+        
+        a, b, c = st.columns([1, 1, 10])
+        with a: leads = st.number_input("Leads", key="leads", min_value=0, max_value=999, step=1)
+        with b: vendas = st.number_input("Vendas", key="vendas", min_value=0, max_value=999, step=1)
+
+        id_checkin = checkin.split(' | ')[0]
+        print(id_checkin)
+        
+        if st.form_submit_button("Salvar"):
+            if checkin and leads >=0 and vendas >= 0:
+                inserir_checkout(id_checkin, leads, vendas)
+                st.success("Checkout salvo com sucesso!")
+                sleep(0.7)
+                st.rerun()
+            else:
+                st.error("Preencha todos os campos!")
+        
+        
+        
+        
