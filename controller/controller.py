@@ -2,22 +2,53 @@ import datetime
 from auth import conecta_supabase
 import pandas as pd
 import re
+import streamlit as st
 
 def limpa_telefone(telefone):
     if telefone is None:
         return None
     return re.sub(r'\D', '', str(telefone))
 
-def get_condominios(username):
+def get_carteira_vendedor(username):
 
-    if username in {'silvania.andrade', 'arthur.wigner', 'nayuri.ferreira',
-        'antonia.moreira', 'felipe.ronaldy', 'basilio.junior', 'tatiana.alianca'}:
-        where = "and c.cidade in ('Fortaleza') and c.estado = 'Ceará'"
-    elif username in {'mariane.sobreira', 'renata.liberato', 'gislene.souza',
-                        'ricardo.batista', 'cairene.santana', 'victor.galdeano', 'ruan.fontes'}:
-        where = """and c.cidade in ('Guarujá', 'Santos', 'Praia Grande') and c.estado = 'São Paulo'"""
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    query = """
+    WITH ultimo_periodo AS (
+    SELECT MAX(periodo) AS periodo
+    FROM tbcarteira
+    where vendedor = %s
+)
+SELECT id_condominio
+FROM tbcarteira
+WHERE periodo = (SELECT periodo FROM ultimo_periodo) and
+vendedor = %s;"""
+
+    cursor.execute(query, (username, username))
+    result = cursor.fetchall()
+
+    df = pd.DataFrame(result, columns=[desc[0] for desc in cursor.description])
+
+    cursor.close()
+    conn.close()
+
+    return df
+
+def get_condominios(username, role):
+
+    if role == "consultor":
+        carteira = get_carteira_vendedor(username)
+        where = "and c.id in (" + ",".join(
+    [
+        ",".join([f"""'{str(v).replace("'", "''")}'""" if not pd.isna(v) else "NULL" for v in row])
+        for row in carteira.values
+    ]
+) + ")"
     else:
-        where = """and 1 = 1"""
+        where = "and 1=1"
+
+    print(where)
 
     conn = conecta_supabase()
     cursor = conn.cursor()

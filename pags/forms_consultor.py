@@ -108,7 +108,7 @@ pills = st.pills(label="", options=["Nova Visita", "Histórico de Visitas", "Fic
 
 if pills == "Cadastro de Leads":
     with st.form("cadastro_leads"):
-        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username']), placeholder="Selecione condomínio", key="condominio")
+        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username'], st.session_state['role']), placeholder="Selecione condomínio", key="condominio")
         nome = st.text_input("Nome", key="nome")
         telefone = st.text_input("Telefone", key="telefone")
         apt_bloco = st.text_input("Apartamento/Bloco", key="apt_bloco")
@@ -207,7 +207,7 @@ elif pills == "Nova Visita":
         with a2: dt_fim = st.date_input("Data de Término",key="dt_fim", format="DD/MM/YYYY")
         with a3: hr_fim = st.time_input("Hora de Término", key="hr_fim", value=round_to_quarter().time())
         
-        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username']), placeholder="Selecione condomínio", key="condominio")
+        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username'], st.session_state['role']), placeholder="Selecione condomínio", key="condominio")
 
         b0, b1, b2, b3 = st.columns([1, 1, 1, 5])
         with b0: torres = st.number_input("Qtde Torres", key="qtde_torres", min_value=1, step=1)
@@ -366,7 +366,7 @@ elif pills == "Nova Visita":
                 
 elif pills == "Ficha Cadastral":
     with st.form("Ficha Cadastral"):
-        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username']), placeholder="Selecione condomínio", key="condominio_ficha")
+        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username'], st.session_state['role']), placeholder="Selecione condomínio", key="condominio_ficha")
         nome = st.text_input("Nome", key="nome_ficha")
         cargo = st.selectbox("Cargo", options=["Síndico", "Administrador", "Porteiro", "Zelador", "Segurança", "Outro"], key="cargo_ficha")
         telefone = st.text_input("Telefone", key="telefone_ficha")
