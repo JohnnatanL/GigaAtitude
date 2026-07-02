@@ -428,9 +428,11 @@ elif pills == "Checkout Plantão":
         with a: leads = st.number_input("Leads", key="leads", min_value=0, max_value=999, step=1)
         with b: vendas = st.number_input("Vendas", key="vendas", min_value=0, max_value=999, step=1)
 
-        id_checkin = checkin.split(' | ')[0]
-        print(id_checkin)
-        
+        if checkin:
+            id_checkin = checkin.split(' | ')[0]
+        else:
+            st.info("⚠️ Nenhum checkin disponível")
+
         if st.form_submit_button("Salvar"):
             if checkin and leads >=0 and vendas >= 0:
                 inserir_checkout(id_checkin, leads, vendas)
