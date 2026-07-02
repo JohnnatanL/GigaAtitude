@@ -423,7 +423,7 @@ elif pills == "Checkout Plantão":
         df_checkin = ler_checkout(st.session_state['username'])
 
         checkin = st.selectbox("Checkin Plantão", options=df_checkin["valor"], key="id_checkout")
-        
+
         a, b, c = st.columns([1, 1, 10])
         with a: leads = st.number_input("Leads", key="leads", min_value=0, max_value=999, step=1)
         with b: vendas = st.number_input("Vendas", key="vendas", min_value=0, max_value=999, step=1)

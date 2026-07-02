@@ -29,11 +29,11 @@ def tela_login():
             if role:
                 user_reset = username.lower().split('.')[0]
                 if password == f"{user_reset}@AltoValor":
-                    mudar_senha(username)
+                    mudar_senha(username.lower())
                 else:
                     st.session_state['role'] = role
                     st.session_state['authenticated'] = True
-                    st.session_state['username'] = username
+                    st.session_state['username'] = username.lower()
                     st.rerun()
             else:
                 st.error("Credenciais inválidas")

@@ -10,7 +10,7 @@ def limpa_telefone(telefone):
     return re.sub(r'\D', '', str(telefone))
 
 def get_carteira_vendedor(username):
-
+    username = username.lower()
     conn = conecta_supabase()
     cursor = conn.cursor()
 
@@ -36,7 +36,7 @@ vendedor = %s;"""
     return df
 
 def get_condominios(username, role):
-
+    username = username.lower()
     if role == "consultor":
         carteira = get_carteira_vendedor(username)
         
@@ -339,7 +339,8 @@ def inserir_ficha(condominio, nome, cargo, telefone, torres, andares, apt_andar,
 
 def inserir_checkin(condominio, dt_inicio, dt_fim, vendedor):
     id_condominio = get_id_condominio(condominio)
-
+    vendedor = vendedor.lower()
+    
     conn = conecta_supabase()
     cursor = conn.cursor()
 
