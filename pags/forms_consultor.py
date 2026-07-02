@@ -394,7 +394,7 @@ elif pills == "Ficha Cadastral":
 
 elif pills == "Checkin Plantão":
     with st.form("Checkin Plantão"):
-        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username']), placeholder="Selecione condomínio", key="condominio_checkin")
+        condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username'], st.session_state['role']), placeholder="Selecione condomínio", key="condominio_checkin")
         
         a, b, c = st.columns([2, 1, 6])
         with a: dt_inicio = st.date_input("Data Inicio", key="data_checkin")
