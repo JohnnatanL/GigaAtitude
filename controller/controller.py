@@ -39,12 +39,15 @@ def get_condominios(username, role):
 
     if role == "consultor":
         carteira = get_carteira_vendedor(username)
-        where = "and c.id in (" + ",".join(
-    [
-        ",".join([f"""'{str(v).replace("'", "''")}'""" if not pd.isna(v) else "NULL" for v in row])
-        for row in carteira.values
-    ]
-) + ")"
+        
+        if carteira.empty:
+            where = "and 1=0"  # nenhuma carteira -> nenhum condomínio
+        else:
+            ids = ",".join(
+                f"""'{str(v).replace("'", "''")}'""" if not pd.isna(v) else "NULL"
+                for v in carteira["id_condominio"]
+            )
+            where = f"and c.id in ({ids})"
     else:
         where = "and 1=1"
 
@@ -68,9 +71,7 @@ def get_condominios(username, role):
     cursor.execute(query)
     result = cursor.fetchall()
 
-    lista = []
-    for row in result:
-        lista.append(row[0])
+    lista = [row[0] for row in result]
 
     cursor.close()
     conn.close()
