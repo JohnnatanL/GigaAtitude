@@ -48,8 +48,6 @@ def get_condominios(username, role):
     else:
         where = "and 1=1"
 
-    print(where)
-
     conn = conecta_supabase()
     cursor = conn.cursor()
 
