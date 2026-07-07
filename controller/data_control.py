@@ -8,6 +8,7 @@ from controller.controller import (
     get_visitas,
     get_consultores
 )
+import calendar
 
 def buscar_vendedores():
 
@@ -90,3 +91,108 @@ group by c.id, c.nome, c.cep, c.numero, v.usuario;"""
 
 
 #print(buscar_vendedores())
+
+def acoes_gestor(periodo, gestor):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    ultimo = periodo.replace(day=calendar.monthrange(periodo.year, periodo.month)[1])
+
+    query = """select a.*, h.gestor_direto as gestor
+from
+(
+select id_condominio, dt_inicio as Data, vendedor as Executivo, 'Acao de Vendas' as Tipo
+from tbacao
+where dt_inicio between %s and %s
+union
+select id_condominio, created_at as Data, vendedor as Executivo, 'Ficha Cadastro' as Tipo
+from tbficha
+where created_at between %s and %s
+union
+select id_condominio, created_at as data, vendedor as Executivo, 'Lead' as Tipo
+from tbleads
+where created_at between %s and %s
+) a
+left join tbusuarios u on a.executivo = u.username
+left join tbhierarquia h on u.id = h.id_usuario and h.periodo = %s
+where h.gestor_direto = %s"""
+
+    cursor.execute(query, (periodo, ultimo, periodo, ultimo, periodo, ultimo, periodo, gestor))
+    result = cursor.fetchall()
+
+    df = pd.DataFrame(result, columns=[description[0] for description in cursor.description])
+
+    cursor.close()
+    conn.close()
+
+    return df
+
+def acoes_consultor(periodo, consultor):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    ultimo = periodo.replace(day=calendar.monthrange(periodo.year, periodo.month)[1])
+
+    query = """select a.*, h.gestor_direto
+from
+(
+select id_condominio, dt_inicio as Data, vendedor as Executivo, 'Acao de Vendas' as Tipo
+from tbacao
+where dt_inicio between %s and %s
+union
+select id_condominio, created_at as Data, vendedor as Executivo, 'Ficha Cadastro' as Tipo
+from tbficha
+where created_at between %s and %s
+union
+select id_condominio, created_at as data, vendedor as Executivo, 'Lead' as Tipo
+from tbleads
+where created_at between %s and %s
+) a
+where a.vendedor = %s"""
+
+    cursor.execute(query, (periodo, ultimo, periodo, ultimo, periodo, ultimo, periodo, consultor))
+    result = cursor.fetchall()
+
+    df = pd.DataFrame(result, columns=[description[0] for description in cursor.description])
+
+    cursor.close()
+    conn.close()
+
+    return df
+
+def acoes_planej(periodo):
+    conn = conecta_supabase()
+    cursor = conn.cursor()
+
+    ultimo = periodo.replace(day=calendar.monthrange(periodo.year, periodo.month)[1])
+
+    query = """select a.*, h.gestor_direto as gestor
+from
+(
+    select id_condominio, dt_inicio as Data, vendedor as Executivo, 'Acao de Vendas' as Tipo
+    from tbacao
+    where dt_inicio between %s and %s
+    union
+    select id_condominio, created_at as Data, vendedor as Executivo, 'Ficha Cadastro' as Tipo
+    from tbficha
+    where created_at between %s and %s
+    union
+    select id_condominio, created_at as Data, vendedor as Executivo, 'Lead' as Tipo
+    from tbleads
+    where created_at between %s and %s
+) a
+left join tbusuarios u on a.executivo = u.username
+left join tbhierarquia h on u.id = h.id_usuario and h.periodo = %s
+where a.Executivo not in ('john', 'johnteste', 'vitor.horacio', 'jose.canale', 'juliana.maximo');"""
+
+    cursor.execute(query, (periodo, ultimo, periodo, ultimo, periodo, ultimo, periodo))
+    result = cursor.fetchall()
+
+    df = pd.DataFrame(result, columns=[description[0] for description in cursor.description])
+
+    df.columns = [c.capitalize() for c in df.columns]
+
+    cursor.close()
+    conn.close()
+
+    return df
