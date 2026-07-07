@@ -40,6 +40,7 @@ if pills == "Ações":
 
     with colb: botao = st.button("Gerar")
 
+    
     if botao:
         if st.session_state['role'] == 'gestor':
             df = acoes_gestor(data_ref, st.session_state['username'])
@@ -64,8 +65,12 @@ if pills == "Ações":
                                      values='Data', 
                                      aggfunc='count', 
                                      fill_value=0)
-                                     
+
+        st.text("Resumo de Ações")                  
         st.dataframe(df_sumarizado, width="content")
+
+        st.text("Detalhamento")
+        st.dataframe(df, width="content")
    
 
         

@@ -125,6 +125,8 @@ where h.gestor_direto = %s"""
     cursor.close()
     conn.close()
 
+    df.columns = [c.capitalize() for c in df.columns]
+
     return df
 
 def acoes_consultor(periodo, consultor):
@@ -133,7 +135,7 @@ def acoes_consultor(periodo, consultor):
 
     ultimo = periodo.replace(day=calendar.monthrange(periodo.year, periodo.month)[1])
 
-    query = """select a.*, h.gestor_direto
+    query = """select a.*
 from
 (
 select id_condominio, dt_inicio as Data, vendedor as Executivo, 'Acao de Vendas' as Tipo
@@ -148,15 +150,17 @@ select id_condominio, created_at as data, vendedor as Executivo, 'Lead' as Tipo
 from tbleads
 where created_at between %s and %s
 ) a
-where a.vendedor = %s"""
+where a.Executivo = %s"""
 
-    cursor.execute(query, (periodo, ultimo, periodo, ultimo, periodo, ultimo, periodo, consultor))
+    cursor.execute(query, (periodo, ultimo, periodo, ultimo, periodo, ultimo, consultor))
     result = cursor.fetchall()
 
     df = pd.DataFrame(result, columns=[description[0] for description in cursor.description])
 
     cursor.close()
     conn.close()
+    
+    df.columns = [c.capitalize() for c in df.columns]
 
     return df
 
