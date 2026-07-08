@@ -51,12 +51,15 @@ if pills == "Ações":
                                      fill_value=0)
 
         elif st.session_state['role'] == 'consultor':
+
             df = acoes_consultor(data_ref, st.session_state['username'])
-            df_sumarizado = df.pivot_table(index='Executivo', 
-                                     columns='Tipo', 
-                                     values='Data', 
-                                     aggfunc='count', 
-                                     fill_value=0)
+            tipos = ['Visita', 'Acao de Vendas', 'Ficha Cadastro', 'Lead']
+
+            df_sumarizado = (
+                df.pivot_table(index='Executivo', columns='Tipo',
+                               values='Data', aggfunc='count', fill_value=0)
+                .reindex(columns=tipos, fill_value=0)
+            )
                                     
         elif st.session_state['role'] in ['planejamento','admin']:
             df = acoes_planej(data_ref)
@@ -65,12 +68,30 @@ if pills == "Ações":
                                      values='Data', 
                                      aggfunc='count', 
                                      fill_value=0)
+        visitas = df_sumarizado['Visita'][0]
+        ficha = df_sumarizado['Ficha Cadastro'][0]
+        lead = df_sumarizado['Lead'][0]
+        acoes = df_sumarizado['Acao de Vendas'][0]
+        st.divider()
+        st.subheader(f"Total de Ações: {acoes+visitas+lead+ficha}")
+        st.table(
+            [
+                f":gray-badge[Executivo de Vendas: {st.session_state['username']}]",
+                f":green-badge[Visitas: {visitas}]    :blue-badge[Ações de Vendas: {acoes}]",
+                f":violet-badge[Leads: {lead}]    :orange-badge[Fichas de Cadastro: {ficha}]",
+            ],
+            border="horizontal",
+            width="content",
+        )
 
-        st.text("Resumo de Ações")                  
-        st.dataframe(df_sumarizado, width="content")
-
-        st.text("Detalhamento")
-        st.dataframe(df, width="content")
+        st.subheader("Detalhamento")
+        st.dataframe(df, width="content", column_config={
+            "Gestor": st.column_config.TextColumn(width=160),
+            "Executivo": st.column_config.TextColumn(width=180),
+            "Acao de Vendas": st.column_config.NumberColumn("Ação de Vendas", width=130),
+            "Ficha Cadastro": st.column_config.NumberColumn(width=130),
+            "Lead": st.column_config.NumberColumn(width=90),
+        })
    
 
         
