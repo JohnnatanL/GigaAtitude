@@ -104,7 +104,7 @@ def mostrar_detalhes(id_visita):
 
 st.title("👋 :grey[Visita Comercial]")
 
-pills = st.pills(label="", options=["Nova Visita", "Histórico de Visitas", "Ficha Cadastral", "Cadastro de Leads", "Checkin Plantão", "Checkout Plantão", "Permutas"])
+pills = st.pills(label="", options=["Nova Visita", "Ficha Cadastral", "Cadastro de Leads", "Checkin Plantão", "Checkout Plantão", "Permutas"])
 
 if pills == "Cadastro de Leads":
     with st.form("cadastro_leads"):
