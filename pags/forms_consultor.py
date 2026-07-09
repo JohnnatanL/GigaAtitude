@@ -269,6 +269,7 @@ elif pills == "Nova Visita":
                         "Tipo de Negócio",
                         options=[
                             'Máquinas de vendas',
+                            'Academia',
                             'Mercearia interna',
                             'Lavanderia',
                             'Geladeiras inteligentes',

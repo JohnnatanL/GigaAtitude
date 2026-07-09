@@ -19,16 +19,17 @@ st.set_page_config(
 
 st.title("📊 :grey[Relatórios]")
 
-pills = st.pills(label="", options=["Geral", "Ações"])
+pills = st.pills(label="", options=["Relatório de Ações", "Crescimento de Base"])
 
-if pills == "Ações":
+if pills == "Relatório de Ações":
 
-    cola, colb = st.columns([3, 4])
+    cola, colb, c = st.columns([2, 1, 9])
 
     with cola:
         data = st.selectbox(
             "Período",
             options=["Jun/26", "Jul/26", "Ago/26", "Set/26", "Out/26", "Nov/26", "Dez/26"],
+            index=1,
             width=150,
         )
 
@@ -38,9 +39,10 @@ if pills == "Ações":
         mes, ano = data.split("/")
         data_ref = date(2000 + int(ano), meses[mes], 1)
 
-    with colb: botao = st.button("Gerar")
+    with colb:
+        
+        botao = st.button("Gerar")
 
-    
     if botao:
         if st.session_state['role'] == 'gestao':
             df = acoes_gestor(data_ref, st.session_state['username'])
