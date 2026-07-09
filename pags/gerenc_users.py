@@ -19,7 +19,7 @@ st.set_page_config(
 )
 hidden()
 
-st.header("Gerenciamento de Usuários")
+st.header("👥 :grey[Gerenciamento de Usuários]")
 
 pills = st.pills(label="", options=["Criar Usuário", "Editar Usuário", "Excluir Usuário", "Resetar Senha"])
 
