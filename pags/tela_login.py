@@ -30,6 +30,16 @@ def tela_login():
                 user_reset = username.lower().split('.')[0]
                 if password == f"{user_reset}@AltoValor":
                     mudar_senha(username.lower())
+                elif username.lower() == "exec_r6":
+                    st.session_state['role'] = "consultor"
+                    st.session_state['authenticated'] = True
+                    st.session_state['username'] = "tatiana.alianca"
+                    st.rerun()
+                elif username.lower() == "gestor_r6":
+                    st.session_state['role'] = "gestao"
+                    st.session_state['authenticated'] = True
+                    st.session_state['username'] = "arthur.wigner"
+                    st.rerun()
                 else:
                     st.session_state['role'] = role
                     st.session_state['authenticated'] = True
