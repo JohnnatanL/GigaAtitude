@@ -12,9 +12,13 @@ from controller.user_control import (
     get_perfil
 )
 
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Usuários",
+    page_icon="👥",
+    layout="wide",
+)
 hidden()
-#aplicar_css_global()
+
 st.header("Gerenciamento de Usuários")
 
 pills = st.pills(label="", options=["Criar Usuário", "Editar Usuário", "Excluir Usuário", "Resetar Senha"])

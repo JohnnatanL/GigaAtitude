@@ -2,9 +2,12 @@ import streamlit as st
 from controller.hidden import hidden
 from stylo.css import aplicar_css_global
 
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Início",
+    page_icon="🏠",
+    layout="wide",
+)
 hidden()
-#aplicar_css_global()
 
 with st.container(border=False, horizontal_alignment="center"):
     st.title("👋 :grey[Bem vindo ao Portal Alto Valor.]", text_alignment="center")
