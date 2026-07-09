@@ -102,7 +102,7 @@ def mostrar_detalhes(id_visita):
         st.rerun()
 
 
-st.title("👋 :grey[Visita Comercial]")
+st.title("👋 :grey[Forms Alto Valor FTTA]")
 
 pills = st.pills(label="", options=["Nova Visita", "Ficha Cadastral", "Cadastro de Leads", "Checkin Plantão", "Checkout Plantão", "Permutas"])
 
