@@ -17,7 +17,7 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("👋 :grey[Relatórios]")
+st.title("📊 :grey[Relatórios]")
 
 pills = st.pills(label="", options=["Geral", "Ações"])
 

@@ -18,7 +18,7 @@ from time import sleep
 
 # ── Configuração da página ──────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Visita Comercial – Giga+ Fibra",
+    page_title="📋 Forms",
     page_icon="📋",
     layout="wide",
 )
@@ -102,7 +102,7 @@ def mostrar_detalhes(id_visita):
         st.rerun()
 
 
-st.title("👋 :grey[Forms Alto Valor FTTA]")
+st.title("📋 :grey[Forms Alto Valor FTTA]")
 
 pills = st.pills(label="", options=["Nova Visita", "Ficha Cadastral", "Cadastro de Leads", "Checkin Plantão", "Checkout Plantão", "Permutas"])
 
