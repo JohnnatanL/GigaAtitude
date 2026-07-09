@@ -98,9 +98,19 @@ def acoes_gestor(periodo, gestor):
 
     ultimo = periodo.replace(day=calendar.monthrange(periodo.year, periodo.month)[1])
 
-    query = """select a.*, h.gestor_direto as gestor
+    query = """select concat(c.nome, ' (',
+            c.cidade, '-',
+            c.sigla_estado, ', ',
+            c.bairro, ', ',
+            c.logradouro, ', ',
+            c.numero, ', ',
+            c.cep, ')') as Condominio, a.*, h.gestor_direto as gestor
 from
 (
+select id_condominio, dt_inicio as data, usuario as Executivo, 'Visita' as Tipo
+from tbvisita
+where dt_inicio between %s and %s
+union
 select id_condominio, dt_inicio as Data, vendedor as Executivo, 'Acao de Vendas' as Tipo
 from tbacao
 where dt_inicio between %s and %s
@@ -114,10 +124,11 @@ from tbleads
 where created_at between %s and %s
 ) a
 left join tbusuarios u on a.executivo = u.username
+left join tb_condominio c on a.id_condominio = c.id
 left join tbhierarquia h on u.id = h.id_usuario and h.periodo = %s
 where h.gestor_direto = %s"""
 
-    cursor.execute(query, (periodo, ultimo, periodo, ultimo, periodo, ultimo, periodo, gestor))
+    cursor.execute(query, (periodo, ultimo, periodo, ultimo, periodo, ultimo, periodo, ultimo, periodo, gestor))
     result = cursor.fetchall()
 
     df = pd.DataFrame(result, columns=[description[0] for description in cursor.description])
@@ -126,6 +137,8 @@ where h.gestor_direto = %s"""
     conn.close()
 
     df.columns = [c.capitalize() for c in df.columns]
+
+    df.drop(columns=['Id_condominio'], inplace=True)
 
     return df
 

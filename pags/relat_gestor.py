@@ -99,7 +99,7 @@ if pills == "Ações":
             )
 
             st.subheader("Detalhamento")
-            st.dataframe(df, width="content", column_config={
+            st.dataframe(df, width="content", hide_index=False, column_config={
                 "Gestor": st.column_config.TextColumn(width=160),
                 "Executivo": st.column_config.TextColumn(width=180),
                 "Acao de Vendas": st.column_config.NumberColumn("Ação de Vendas", width=130),
@@ -113,21 +113,21 @@ if pills == "Ações":
                 if c not in df_sumarizado.columns:
                     df_sumarizado[c] = 0
             st.subheader(f"Total de Ações da Equipe: {df_sumarizado[['Acao de Vendas', 'Visita', 'Lead', 'Ficha Cadastro']].sum().sum()}")
-            cols = st.columns(2)
+            cols = st.columns(4)
             for i, (_, row) in enumerate(df_sumarizado.iterrows()):
-                with cols[i % 2]:
-                    st.write(f"Total de Ações - {row['Executivo']}: {(row.get('Visita', 0))+(row.get('Acao de Vendas', 0))+(row.get('Lead', 0))+(row.get('Ficha Cadastro', 0))}")
-                    st.table(
-                        [
-                            f":green-badge[Visitas: {row.get('Visita', 0)}]    :blue-badge[Ações de Vendas: {row.get('Acao de Vendas', 0)}]",
-                            f":violet-badge[Leads: {row.get('Lead', 0)}]    :orange-badge[Fichas de Cadastro: {row.get('Ficha Cadastro', 0)}]",
-                        ],
-                        border="horizontal",
-                        width="content",
-                    )
-
+                with cols[i % 4]:
+                    with st.container(border=True):
+                        st.write(f"Total de Ações - {row['Executivo']}: {(row.get('Visita', 0))+(row.get('Acao de Vendas', 0))+(row.get('Lead', 0))+(row.get('Ficha Cadastro', 0))}")
+                        st.table(
+                            [
+                                f":green-badge[Visitas: {row.get('Visita', 0)}]    :blue-badge[Ações de Vendas: {row.get('Acao de Vendas', 0)}]",
+                                f":violet-badge[Leads: {row.get('Lead', 0)}]    :orange-badge[Fichas de Cadastro: {row.get('Ficha Cadastro', 0)}]",
+                            ],
+                            border="horizontal",
+                            width="content",
+                        )
             st.subheader("Detalhamento")
-            st.dataframe(df, width="content", column_config={
+            st.dataframe(df, width="content", hide_index=False, column_config={
                 "Gestor": st.column_config.TextColumn(width=160),
                 "Executivo": st.column_config.TextColumn(width=180),
                 "Acao de Vendas": st.column_config.NumberColumn("Ação de Vendas", width=130),
