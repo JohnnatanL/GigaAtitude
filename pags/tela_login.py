@@ -40,6 +40,11 @@ def tela_login():
                     st.session_state['authenticated'] = True
                     st.session_state['username'] = "arthur.wigner"
                     st.rerun()
+                elif username.lower() == "gestor_r3":
+                    st.session_state['role'] = "gestao"
+                    st.session_state['authenticated'] = True
+                    st.session_state['username'] = "mariane.sobreira"
+                    st.rerun()
                 else:
                     st.session_state['role'] = role
                     st.session_state['authenticated'] = True
