@@ -18,7 +18,7 @@ from time import sleep
 
 # ── Configuração da página ──────────────────────────────────────────────────
 st.set_page_config(
-    page_title="📋 Forms",
+    page_title="Forms",
     page_icon="📋",
     layout="wide",
 )
@@ -209,15 +209,18 @@ elif pills == "Nova Visita":
         
         condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username'], st.session_state['role']), placeholder="Selecione condomínio", key="condominio")
 
-        b0, b1, b2, b3 = st.columns([1, 1, 1, 5])
-        with b0: torres = st.number_input("Qtde Torres", key="qtde_torres", min_value=1, step=1)
-        with b1: andares = st.number_input("Qtde Andares", key="qtde_andares", min_value=1, step=1)
-        with b2: apto_andar = st.number_input("Apto por Andar", key="apto_por_andar", min_value=1, step=1)
+        torres = 0
+        andares = 0
+        apto_andar = 0
+        #b0, b1, b2, b3 = st.columns([1, 1, 1, 5])
+        #with b0: torres = st.number_input("Qtde Torres", key="qtde_torres", min_value=1, step=1)
+        #with b1: andares = st.number_input("Qtde Andares", key="qtde_andares", min_value=1, step=1)
+        #with b2: apto_andar = st.number_input("Apto por Andar", key="apto_por_andar", min_value=1, step=1)
 
         c0, c1, c2 = st.columns([2, 4, 2.5])
         with c0: permuta = st.selectbox("Possui permuta?", ["Não possui", "Possui 1 permuta", "Possui 2 permutas", "Possui 3 ou mais permutas"] ,key="permuta")
         with c1: concorrencia = st.multiselect("Possui concorrência?", ["Exclusivo Giga+ Fibra", "Claro", "Vivo", "TIM", "Oi", "Brisanet", "Multiplay (Alares)", "Algar Telecom", "ProveNET", "Velocinet Provedor", "Byteplay Connect", "QNet Telecom", "Telefibra", "HD Provedor", "Lay Provedor", "Fortalnet", "RedeNet Telecom", "WireXtreme", "Infortec", "JWS Provedor", "Argohost Net", "Orion Telecom", "Bayde Net", "Ciberdyne Internet", "Wire Link", "Ponto Net", "Linknet Provedor", "Outros"], key="concorrencia")
-        with c2: outros_conc = st.text_input("Outros", key="outros_conc")
+        #with c2: outros_conc = st.text_input("Outros", key="outros_conc")
         
         with st.expander("Contatos"):
             df_contatos = pd.DataFrame([

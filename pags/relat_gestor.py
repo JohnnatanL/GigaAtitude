@@ -2,6 +2,7 @@ from controller.controller import inserir_visita
 import numpy as np
 import streamlit as st
 from controller.data_control import acoes_gestor, acoes_consultor, acoes_planej
+from controller.controller import get_condominios, get_ficha, resume_condominio
 import pandas as pd
 from datetime import datetime
 import datetime as dt
@@ -19,7 +20,7 @@ st.set_page_config(
 
 st.title("📊 :grey[Relatórios]")
 
-pills = st.pills(label="", options=["Relatório de Ações", "Crescimento de Base"])
+pills = st.pills(label="", options=["Ficha do Condomínio", "Relatório de Ações", "Crescimento de Base"])
 
 if pills == "Relatório de Ações":
 
@@ -40,7 +41,7 @@ if pills == "Relatório de Ações":
         data_ref = date(2000 + int(ano), meses[mes], 1)
 
     with colb:
-        
+
         botao = st.button("Gerar")
 
     if botao:
@@ -136,3 +137,44 @@ if pills == "Relatório de Ações":
                 "Ficha Cadastro": st.column_config.NumberColumn(width=130),
                 "Lead": st.column_config.NumberColumn(width=90),
             })
+
+elif pills == "Crescimento de Base":
+    
+    st.subheader("Crescimento de Base")
+    st.subheader("Em Contrução!")
+
+elif pills == "Ficha do Condomínio":
+    
+    st.subheader("Ficha do Condomínio")
+    a, b, c = st.columns([5, 1, 6])
+    with a: condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username'], st.session_state['role']), placeholder="Selecione condomínio", key="condominio")
+    with b: 
+        st.write(".")
+        vai = st.button("Gerar Ficha")
+
+    
+    if condominio and vai:
+        df_ficha = resume_condominio(get_ficha(condominio))
+
+        d, e, f, g = st.columns(4)
+        with d:
+            st.metric("Qtde Torres", df_ficha['qtde_torres'])
+            st.metric("Qtde Andares", df_ficha['qtde_andares'])
+            st.metric("Qtde Apto por Andar", df_ficha['qtde_apto_andar'])
+        with e:
+            texto = df_ficha['contatos'].iloc[0]
+            linhas = [c.strip() for c in texto.split(';') if c.strip()]
+            df_contatos = pd.DataFrame(linhas, columns=['Contato'])
+            st.table(df_contatos)
+        with f:
+            texto = df_ficha['parceiros'].iloc[0]
+            linhas = [c.strip() for c in texto.split(';') if c.strip()]
+            df_contatos = pd.DataFrame(linhas, columns=['Parceiros'])
+            st.table(df_contatos)
+        with g:
+            texto = df_ficha['concorrencia'].iloc[0]
+            linhas = [c.strip() for c in texto.split(';') if c.strip()]
+            df_contatos = pd.DataFrame(linhas, columns=['Concorrência'])
+            st.table(df_contatos)
+
+        #st.dataframe(df_ficha, use_container_width=True, hide_index=True)
