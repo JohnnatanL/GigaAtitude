@@ -49,6 +49,8 @@ def get_condominios(username, role):
                 for v in carteira["id_condominio"]
             )
             where = f"and c.id in ({ids})"
+    elif username == "arthur.wigner":
+        where = "and c.sigla_estado in ('CE')"
     else:
         where = "and 1=1"
 

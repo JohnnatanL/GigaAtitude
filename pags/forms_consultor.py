@@ -339,7 +339,7 @@ elif pills == "Nova Visita":
 
             if dataInicial >= dataFinal:
                 st.error("Data inicial deve ser anterior à data final")
-            elif not all([dt_inicio, hr_inicio, dt_fim, hr_fim, condominio, torres, andares, apto_andar, permuta, concorrencia]):
+            elif not all([dt_inicio, hr_inicio, dt_fim, hr_fim, condominio, permuta, concorrencia]):
                 st.error("Preencha os campos obrigatórios")
             elif not lista_contatos:
                 st.error("Preencha pelo menos um contato")
@@ -353,7 +353,7 @@ elif pills == "Nova Visita":
                     "qtde_apto_andar": apto_andar,
                     "permuta": permuta,
                     "concorrencia": concorrencia,
-                    "outros_conc": outros_conc,
+                    #"outros_conc": outros_conc,
                 }
 
                 if lista_contatos:

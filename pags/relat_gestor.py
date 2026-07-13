@@ -24,7 +24,7 @@ pills = st.pills(label="", options=["Ficha do Condomínio", "Relatório de Açõ
 
 if pills == "Relatório de Ações":
 
-    cola, colb, c = st.columns([2, 1, 9])
+    cola, colb, c = st.columns([2, 1, 18])
 
     with cola:
         data = st.selectbox(
@@ -149,32 +149,47 @@ elif pills == "Ficha do Condomínio":
     a, b, c = st.columns([5, 1, 6])
     with a: condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username'], st.session_state['role']), placeholder="Selecione condomínio", key="condominio")
     with b: 
-        st.write(".")
         vai = st.button("Gerar Ficha")
 
     
     if condominio and vai:
-        df_ficha = resume_condominio(get_ficha(condominio))
+        try:
+            df_ficha = resume_condominio(get_ficha(condominio))
 
-        d, e, f, g = st.columns(4)
-        with d:
-            st.metric("Qtde Torres", df_ficha['qtde_torres'])
-            st.metric("Qtde Andares", df_ficha['qtde_andares'])
-            st.metric("Qtde Apto por Andar", df_ficha['qtde_apto_andar'])
-        with e:
-            texto = df_ficha['contatos'].iloc[0]
-            linhas = [c.strip() for c in texto.split(';') if c.strip()]
-            df_contatos = pd.DataFrame(linhas, columns=['Contato'])
-            st.table(df_contatos)
-        with f:
-            texto = df_ficha['parceiros'].iloc[0]
-            linhas = [c.strip() for c in texto.split(';') if c.strip()]
-            df_contatos = pd.DataFrame(linhas, columns=['Parceiros'])
-            st.table(df_contatos)
-        with g:
-            texto = df_ficha['concorrencia'].iloc[0]
-            linhas = [c.strip() for c in texto.split(';') if c.strip()]
-            df_contatos = pd.DataFrame(linhas, columns=['Concorrência'])
-            st.table(df_contatos)
+            d, e, f, g = st.columns(4)
 
-        #st.dataframe(df_ficha, use_container_width=True, hide_index=True)
+            with d:
+                st.table(
+                    [   f":grey[Dados do Condomínio]",
+                        f":green-badge[Qtde Torres: {df_ficha['qtde_torres'].iloc[0]}]",
+                        f":green-badge[Qtde Andares: {df_ficha['qtde_andares'].iloc[0]}]",
+                        f":green-badge[Qtde Apto por Andar: {df_ficha['qtde_apto_andar'].iloc[0]}]",
+                    ]
+                )
+
+            with e:
+                texto = df_ficha['contatos'].iloc[0]
+                linhas = [c.strip() for c in str(texto).split(';') if c.strip()]
+                if linhas:
+                    st.table(pd.DataFrame([f":blue-badge[{l}]" for l in linhas], columns=['Contato']))
+                else:
+                    st.caption("Sem contatos registrados.")
+
+            with f:
+                texto = df_ficha['parceiros'].iloc[0]
+                linhas = [c.strip() for c in str(texto).split(';') if c.strip()]
+                if linhas:
+                    st.table(pd.DataFrame([f":violet-badge[{l}]" for l in linhas], columns=['Parceiros']))
+                else:
+                    st.caption("Sem parceiros registrados.")
+
+            with g:
+                texto = df_ficha['concorrencia'].iloc[0]
+                linhas = [c.strip() for c in str(texto).split(',') if c.strip()]
+                if linhas:
+                    st.table(pd.DataFrame([f":yellow-badge[{l}]" for l in linhas], columns=['Concorrência']))
+                else:
+                    st.caption("Sem concorrência registrada.")
+
+        except Exception:
+            st.info("Sem dados de ficha para este condomínio.")
