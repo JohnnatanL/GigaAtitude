@@ -1,22 +1,12 @@
-from auth import conecta_supabase
-import bcrypt
-import pandas as pd
-from controller.user_control import resetar_senha
+import reflex as rx
 
-conn = conecta_supabase()
-cursor = conn.cursor()
+class teste(rx.State):
+    pass
 
-query = """
-SELECT id, username FROM tbusuarios WHERE id >= '5';
-"""
+def index():
+    return rx.heading("teste")
 
-cursor.execute(query)
-result = cursor.fetchall()
+app = rx.App()
+app.add_page(index)
 
-df = pd.DataFrame(result, columns=[desc[0] for desc in cursor.description])
-
-for idx, row in df.iterrows():
-    resetar_senha(row['id'], row['username'])
-
-cursor.close()
-conn.close()
+app.run()

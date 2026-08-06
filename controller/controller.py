@@ -51,6 +51,10 @@ def get_condominios(username, role):
             where = f"and c.id in ({ids})"
     elif username == "arthur.wigner":
         where = "and c.sigla_estado in ('CE')"
+    elif username == "mariane.sobreira":
+        where = "and c.sigla_estado in ('SP') and c.cidade in ('Praia Grande', 'Santos', 'Guarujá', 'Bertioga')"
+    elif username == "rafael.drumond":
+        where = "and c.sigla_estado in ('ES') AND c.cidade in ('Guarapari')"
     else:
         where = "and 1=1"
 
