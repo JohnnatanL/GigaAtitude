@@ -229,6 +229,7 @@ elif pills == "Nova Visita":
                     "Cargo": "",
                     "Telefone": "",
                     "Email": "",
+                    "Aniversário": ""
                 }]
             )
 
@@ -250,6 +251,7 @@ elif pills == "Nova Visita":
                     ),
                     "Telefone": st.column_config.TextColumn("Telefone"),
                     "E-mail": st.column_config.TextColumn("Email"),
+                    "Aniversário": st.column_config.TextColumn("Aniversário", max_chars=10),
                 },
                 hide_index=True,
                 num_rows="dynamic",
@@ -309,6 +311,7 @@ elif pills == "Nova Visita":
                         "Cargo": i[2],
                         "Telefone": i[3],
                         "Email": i[4],
+                        "Aniversario": i[5],
                     }
                     for i in contatos.itertuples()
                     if any([
@@ -371,16 +374,16 @@ elif pills == "Nova Visita":
 elif pills == "Ficha Cadastral":
     with st.form("Ficha Cadastral"):
         condominio = st.selectbox("Condomínio", options=get_condominios(st.session_state['username'], st.session_state['role']), placeholder="Selecione condomínio", key="condominio_ficha")
-        nome = st.text_input("Nome", key="nome_ficha")
-        cargo = st.selectbox("Cargo", options=["Síndico", "Administrador", "Porteiro", "Zelador", "Segurança", "Outro"], key="cargo_ficha")
+        a0, b0, c0 = st.columns([7, 3, 3])
+        with a0: nome = st.text_input("Nome", key="nome_ficha")
+        with b0: cargo = st.selectbox("Cargo", options=["Síndico", "Administrador", "Porteiro", "Zelador", "Segurança", "Outro"], key="cargo_ficha")
+        with c0: aniversario = st.date_input("Aniversário", key="aniversario_ficha", format="DD/MM/YYYY", min_value="1925-01-01", max_value="2007-12-31", value="2000-01-01")
         telefone = st.text_input("Telefone", key="telefone_ficha")
 
         a, b, c, d, e = st.columns(5)
         with a: torres = st.number_input("Torres", key="torres_ficha", value=1, min_value=1, max_value=999, step=1)
         with b: andares = st.number_input("Andares", key="andares_ficha", value=1, min_value=1, max_value=999, step=1)
         with c: apt_andar = st.number_input("Apt por Andar", key="apt_andar", value=1, min_value=1, max_value=999, step=1)
-        with d: hp = st.number_input("HP", key="hp", value=1, min_value=1, max_value=999, step=1)
-        with e: hf = st.number_input("HF", key="hf", value=8, min_value=8, max_value=999, step=8)
 
         if st.form_submit_button("Salvar"):
             if condominio and nome and cargo and telefone:
@@ -389,7 +392,7 @@ elif pills == "Ficha Cadastral":
                     sleep(1)
                     st.rerun()
                 else:
-                    inserir_ficha(condominio, nome, cargo, telefone, torres, andares, apt_andar, hp, hf, st.session_state['username'])
+                    inserir_ficha(condominio, nome, cargo, telefone, aniversario, torres, andares, apt_andar, st.session_state['username'])
                     st.success("Contato salvo com sucesso!")
                     sleep(0.7)
                     st.rerun()

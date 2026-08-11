@@ -315,7 +315,7 @@ def inserir_leads(condominio, nome, telefone, apt_bloco, vendedor):
     conn.close()
     return True
 
-def inserir_ficha(condominio, nome, cargo, telefone, torres, andares, apt_andar, hp_inf, hf, vendedor):
+def inserir_ficha(condominio, nome, cargo, telefone, aniversario, torres, andares, apt_andar, vendedor):
     id_condominio = get_id_condominio(condominio)
     telefone_limpo = limpa_telefone(telefone)
 
@@ -329,16 +329,15 @@ def inserir_ficha(condominio, nome, cargo, telefone, torres, andares, apt_andar,
                 nome,
                 cargo,
                 telefone,
+                aniversario,
                 torres,
                 andares,
                 apt_andar,
-                hp_inf,
-                hf,
                 vendedor,
                 hp
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
-    cursor.execute(query, (id_condominio, nome, cargo, telefone_limpo, torres, andares, apt_andar, hp_inf, hf, vendedor, hp_real))
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+    cursor.execute(query, (id_condominio, nome, cargo, telefone_limpo, aniversario, torres, andares, apt_andar, vendedor, hp_real))
     conn.commit()
     cursor.close()
     conn.close()
